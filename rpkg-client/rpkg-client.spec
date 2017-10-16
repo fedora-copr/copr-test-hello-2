@@ -1,5 +1,5 @@
 Name: rpkg-client
-Version: 0.9
+Version: 0.10
 Release: 1%{?dist}
 Summary: RPM packaging utitility
 License: GPLv2+
