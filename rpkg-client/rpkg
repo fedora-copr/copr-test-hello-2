@@ -1,0 +1,78 @@
+#!/usr/bin/python
+# rpkg - a script to interact with the Red Hat Packaging system
+#
+# Copyright (C) 2011 Red Hat Inc.
+# Author(s): Jesse Keating <jkeating@redhat.com>
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.  See http://www.gnu.org/copyleft/gpl.html for
+# the full text of the license.
+
+import pyrpkg
+import pyrpkg.cli
+import pyrpkg.utils
+import os
+import sys
+import logging
+from six.moves import configparser
+import argparse
+from rpkglib.cli import rpkgClient
+from os.path import expanduser
+
+# Setup an argparser and parse the known commands to get the config file
+parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument('-C', '--config', help='Specify a config file to use. '
+                    'If not specified, ~/.config/rpkg is used and if that '
+                    'does not exists, then /etc/rpkg.conf is tried.')
+
+(args, other) = parser.parse_known_args()
+
+config_to_use = '/etc/rpkg.conf'
+for custom_config in [args.config, expanduser('~/.config/rpkg')]:
+    if custom_config and os.path.exists(custom_config):
+        config_to_use = custom_config
+        break
+
+# Setup a configuration object and read config file data
+config = configparser.SafeConfigParser()
+config.read(config_to_use)
+
+client = rpkgClient(config)
+client.do_imports('rpkglib')
+client.parse_cmdline()
+
+if not client.args.path:
+    try:
+        client.args.path = pyrpkg.utils.getcwd()
+    except:
+        print('Could not get current path, have you deleted it?')
+        sys.exit(1)
+
+# setup the logger -- This logger will take things of INFO or DEBUG and
+# log it to stdout.  Anything above that (WARN, ERROR, CRITICAL) will go
+# to stderr.  Normal operation will show anything INFO and above.
+# Quiet hides INFO, while Verbose exposes DEBUG.  In all cases WARN or
+# higher are exposed (via stderr).
+log = pyrpkg.log
+client.setupLogging(log)
+
+if client.args.v:
+    log.setLevel(logging.DEBUG)
+elif client.args.q:
+    log.setLevel(logging.WARNING)
+else:
+    log.setLevel(logging.INFO)
+
+# Run the necessary command
+try:
+    sys.exit(client.args.command())
+except KeyboardInterrupt:
+    pass
+except Exception as e:
+    log.error('Could not execute %s: %s' %
+              (client.args.command.__name__, str(e)))
+    if client.args.v:
+        raise
+    sys.exit(1)

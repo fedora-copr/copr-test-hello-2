@@ -1,0 +1,5 @@
+*.pyc
+*.pyo
+.cache
+*.tar.gz
+*.src.rpm
