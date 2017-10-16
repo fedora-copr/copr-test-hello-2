@@ -40,7 +40,7 @@ Requires: python2-rpkg
 %description -n rpkg
 This is an RPM packaging utility based on python-rpkg library.
 It works with both DistGit and standard Git repositories and it handles
-packed directory content as well as unpacked content.
+packed directory content as well as unpacked content. update
 
 %prep
 %setup -q
