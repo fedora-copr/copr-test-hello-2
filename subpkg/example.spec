@@ -1,3 +1,4 @@
+%global debug_package %{nil}
 Name:       example
 Version:	1.0.4
 Release:	1%{?dist}
