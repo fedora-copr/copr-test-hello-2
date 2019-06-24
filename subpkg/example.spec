@@ -9,6 +9,7 @@ License:	GPLv2+
 URL:		http://github.com
 Source0:	%{name}-%{version}.tar.gz
 
+BuildRequires:	gcc
 # simulated dependencies
 #BuildRequires:  desktop-file-utils
 #BuildRequires:  gtk2-devel gettext
